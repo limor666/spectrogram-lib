@@ -1,7 +1,7 @@
 # Spectrogram
 
 
-**Spectrogram** is a C++ class for creating spectrograms from PCM audio array. Spectrogram uses [Ooura](https://www.kurims.kyoto-u.ac.jp/~ooura/fft.html) FFT that [benchmarks](https://www.fftw.org/benchfft/ffts.html) decently. It also provides [Mel](https://www.mathworks.com/help/audio/ref/melspectrogram.html) image transformation and some standard colormaps. The code is mildly optimized for speed.
+**Spectrogram** is a C++ class for creating spectrograms from PCM audio array. Spectrogram uses [Ooura](https://www.kurims.kyoto-u.ac.jp/~ooura/fft.html) FFT that [benchmarks](https://www.fftw.org/benchfft/ffts.html) decently. It also provides [Mel](https://www.mathworks.com/help/audio/ref/melspectrogram.html) image transformation and some standard colormaps. The code is mildly optimized for speed, has a small footprint and can be easily embeeded into an application such as a rhythm game.
 
 ![alt text](images/spectrogram_example.jpg)
 ## Quickstart
@@ -57,7 +57,7 @@ sets public members:
     int image_lines; // number of fft's
     int image_width; // frequencies per fft (half of fftsize)
 ```
-FFT of size `fftsize` (a.k.a window, must be power of 2) is computed starting every `stride` samples. The first FFT window can start before the first sample if `start` is negative resulting in zero padded sample window. The last FFT window will have to include at least one sample. If a sample window ends beyond available samples, it will be zero padded. The resulting number of FFT lines in the image is `(samples-start+stride-1)/stride`. The samples are multiplied by a filter window before being processed by FFT. Several popular [filters](https://en.wikipedia.org/wiki/Window_function) can be set with `window_type` including Hanning and Hamming. See [filterwindow.cpp](filterwindow.cpp)
+FFT of size `fftsize` (a.k.a window, must be power of 2) is computed starting every `stride` samples. The first FFT window can start before the first sample if `start` is negative resulting in zero padded sample window. The last FFT window will have to include at least one sample. If a sample window ends beyond available samples, it will be zero padded. The resulting number of FFT lines in the image is `(samples-start+stride-1)/stride`. The samples are multiplied by a filter window before being processed by FFT. Several popular [filters](https://en.wikipedia.org/wiki/Window_function) can be set with `window_type` including Hanning and Hamming. See [filterwindow.cpp](filterwindow.cpp). The result of FFT (DFT) is an array of complex values (r,i) of size fftsize/2 frequencies. The image pixels are computed as `log(hypot(r,i))` and later normalized so that the range of values are between [0..1]. 
 
 ```c++
 spectrogram_histogram_equalization()
@@ -97,19 +97,21 @@ An example program [test_ffmpeg.cpp](test_ffmpeg.cpp) is included in this reposi
 Here are steps to test the code and reproduce the images below:
 
 ```bash
+# install youtube downloader (Ubuntu: sudo apt install yt-dlp)
+# install latest ffmpeg (Ubuntu: sudo snap install ffmpeg --edge)
+# download a sample song for educational purpose
+mkdir ~/test_spectrogram
+cd ~/test_spectrogram
+yt-dlp -x -f251 -o "guitar.%(ext)s" https://www.youtube.com/watch?v=pCEjgl2I4z4 --exec 'ffmpeg -i {} -acodec vorbis -strict -2 guitar.ogg'
 # download this repo:
 git clone https://github.com/limor666/spectrogram-lib
 cd spectrogram-lib
 # compile the demo program and fft designed for SIMD optimization
 g++ -O6  test_ffmpeg.cpp OouraFFT/fftsg.c -lm
-# install youtube downloader (Ubuntu: sudo apt install yt-dlp)
-# install latest ffmpeg (Ubuntu: sudo snap install ffmpeg --edge)
-# download a sample song for educational purpose
-yt-dlp -x -f251 -o "guitar.%(ext)s" https://www.youtube.com/watch?v=pCEjgl2I4z4 --exec 'ffmpeg -i {} -acodec vorbis -strict -2 guitar.ogg'
 # run the program
 # first param: input music file
 # second param: name prefix and type of image format 
-./a.out guitar.ogg asdf.png
+./a.out ../guitar.ogg asdf.png
 # This will create 3 image files
 # fft_asdf.png - colored spectrogram
 # fftg_asdf.png - gray spectrogram

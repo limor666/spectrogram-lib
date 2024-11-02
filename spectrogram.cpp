@@ -32,6 +32,12 @@ class spectrogram
     float *rgb_image_data = nullptr; // colored fft or mel image;
     bool rgb_image_fft_or_mel;
 
+    ~spectrogram() {
+        // audio_data buffer is created outside this class
+        if (image_data) delete[] image_data;
+        if (mel_image_data) delete[] mel_image_data;
+        if (rgb_image_data) delete[] rgb_image_data;
+    }
     spectrogram(float *audio_samples_float32, int audio_nsamples)
     {
         audio_data = audio_samples_float32;
@@ -65,7 +71,7 @@ class spectrogram
         const int NMAXSQRT = 64;
         const int SAMPLESIZE = sizeof(float);
 
-        // buffers prerequisited by Ooura FFT
+        // buffers prerequired by Ooura FFT
         int ooura_ip[NMAXSQRT + 2];
         ooura_ip[0] = ooura_ip[1] = 0; // first time only for rdft
         double ooura_w[NMAX];
@@ -86,7 +92,7 @@ class spectrogram
         float *img = image_data;
         for (int l=0; l<image_lines; l++) {
 
-            // Multiply audio window by Hamming/Other window
+            // Multiply audio window by Hamming/Hanning window
             // Consider cases where window may start before audio or end after audio
             int i = l*stride + start;
             if (i < 0) {
@@ -123,13 +129,18 @@ class spectrogram
 
             for (int j=0; j< image_width; j++) {
                 double x = hypot(*++p, *++p);
+                // usually spectrograms are log-power-spectrum: log(r**2 + i**2)
+                // however, hypot() is documented to be faster than r**2 + i**2
+                // and since log(X**2)=2*log(X) and log(X**0.5)=0.5*log(X)
+                // and later we normalize all the resulting log() values
+                // 2x or 0.5x factor flatens out. Therefore better use the faster hypot()
                 x = (x == 0)? -200: log(x); // avoid log(0) division by zero
 
                 // DC frequency up to~25Hz usually don't have meaningful visual audiable information
                 // but they may have high energy and may cause reduction of details for higher and more interesting frequencies
                 // Here we only ignore DC values -- this may be a small value hence not needed because it is the sum of the normalized signal [-1..+1]
                 if (j==0) {
-                    x=0;
+                    x=0; // this is probably not needed since audio signal is normalized, DC should be 0
                     //continue;
                 }
                 if (x > maxfft) {
@@ -145,8 +156,9 @@ class spectrogram
             }
         }
         float delfft=maxfft-minfft; // delta
+        #ifdef DEBUG
         fprintf(stderr, "TOTAL LINES %d maxfft=%f minfft=%f delfft=%f\n", image_lines, maxfft, minfft, delfft);
-
+        #endif
         img = image_data;
 
         // now that we have min and max, normalize the spectrogram
@@ -154,10 +166,12 @@ class spectrogram
             // *img = *img>maxfft?maxfft:*img // if maxfft ignores DC values, then DC line should be set to zero. otherwise do this histeresis
 
             float x = *img;
-            x = x>maxfft?maxfft:x; // hysterisis needed in case we skipped some frequences when calculating min and max
+            x = x>maxfft?maxfft:x; // hysterisis is possible in case we skipped some frequences when calculating min and max
             x = (x-minfft)/delfft; // normalized to 0..1 on log scale
             if (x > 1) { // sanity check
-                printf("wrong value %f\n",x);
+                #ifdef DEBUG
+                fprintf(stderr, "wrong value %f\n",x);
+                #endif
             }
             *img++ = x;
         }
@@ -226,12 +240,14 @@ class spectrogram
                 int bin_left = bin_edges*x;
                 int bin_right = bin_left+1;
                 if (bin_left < 0) {
-                    bin_left = 0;
+                    #ifdef DEBUG
+                    fprintf (stderr, "problem bin_left=%d\n", bin_left);
+                    #endif
+                   bin_left = 0;
                     bin_right = 1;
                     mod_left=0;
                     mod_right=1;
-                    printf ("problem ");
-                }
+                 }
                 double *l = (*cm)[bin_left];
                 double *r = (*cm)[bin_right];
                 *rgb++ = *l++*mod_left + *r++*mod_right;
