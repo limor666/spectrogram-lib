@@ -101,6 +101,3 @@ An example program [test_ffmpeg.cpp](test_ffmpeg.cpp) is included in this reposi
 ![Mel colored Plasma](images/mel_color.png)
 
 
-
-
-NAudio to get samples from the sound card and display them as a spectrogram. Spectrogram was designed to be able to display spectrograms with live or growing data, so this is exceptionally easy to implement.
