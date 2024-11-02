@@ -1,16 +1,16 @@
 #include <cstdio>
 #include <cstdint>
-#include <cmath>
-
-#include "colormaps.h" // plasma and such
-#include "filterwindow.cpp"
-#include "mel.cpp"
+#include <cmath> // log()
 #include <cfloat> // FLT_MAX, FLT_MIN
 #include <cstring> // memset()
 
+#include "colormaps.h" // plasma and such
+#include "filterwindow.cpp" // Hanning, Hamming..
+#include "mel.cpp" // log-distort image
 
 // rdft uses double but one could #define double as float and compile as such.
-// here we just copy to new array of doubles since we anyway multiply by array of filter Window.
+// here we just copy to new array of doubles since we must anyway multiply audio samples by array of filter Window.
+// Ooura library doesn't have an include file with function definitions
 void rdft(int, int, double *, int *, double *); // N, direction, inout, private, sin\cos
 
 

@@ -1,7 +1,7 @@
 #include <cstdio>
 #include "spectrogram.cpp"
 
-// g++ -DTEST -O6  spectrogram_class.cpp ../OouraFFT/fftsg.c -lm
+// g++ -DTEST -O6  test_ffmpeg.cpp ../OouraFFT/fftsg.c -lm
 // ./a.out guitar.ogg asdf.png
 // creates 3 files : fft_asdf.png  fftg_asdf.png  mel_asdf.png
 // Requires ffmpeg to be installed. To view the big files use gimp
