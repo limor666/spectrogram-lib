@@ -96,7 +96,7 @@ An example program [test_ffmpeg.cpp](test_ffmpeg.cpp) is included in this reposi
 
 Here are steps to test the code and reproduce the images below:
 
-```sh
+```bash
 # download this repo:
 git clone https://github.com/limor666/spectrogram-lib
 cd spectrogram-lib

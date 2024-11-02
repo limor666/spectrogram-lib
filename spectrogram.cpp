@@ -76,7 +76,7 @@ class spectrogram
         // first_line window must start at sample > -window
         // last_line window must start at sample <= last_sample
         if (start <= -WINDOW) start = -WINDOW+1;
-        image_lines = (audio_samples+start+stride-1)/stride;
+        image_lines = (audio_samples-start+stride-1)/stride;
         image_data = new float[image_lines*image_width];
     
         double maxfft=-DBL_MAX;
