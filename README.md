@@ -96,14 +96,14 @@ An example program [test_ffmpeg.cpp](test_ffmpeg.cpp) is included in this reposi
 
 Here are steps to test the code and reproduce the images below:
 
-```bash
-# install youtube downloader (Ubuntu: sudo apt install yt-dlp)
+```shell
+# install youtube downloader (Ubuntu: sudo snap install yt-dlp --edge)
 # install latest ffmpeg (Ubuntu: sudo snap install ffmpeg --edge)
 # download a sample song for educational purpose
 mkdir ~/test_spectrogram
 cd ~/test_spectrogram
 yt-dlp -x -f251 -o "guitar.%(ext)s" https://www.youtube.com/watch?v=pCEjgl2I4z4 --exec 'ffmpeg -i {} -acodec vorbis -strict -2 guitar.ogg'
-# download this repo:
+# download this repo
 git clone https://github.com/limor666/spectrogram-lib
 cd spectrogram-lib
 # compile the demo program and fft designed for SIMD optimization
