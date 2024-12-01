@@ -83,6 +83,7 @@ class spectrogram
         // last_line window must start at sample <= last_sample
         if (start <= -WINDOW) start = -WINDOW+1;
         image_lines = (audio_samples-start+stride-1)/stride;
+        if (image_data != nullptr) delete[] image_data;
         image_data = new float[image_lines*image_width];
     
         double maxfft=-DBL_MAX;
@@ -205,7 +206,7 @@ class spectrogram
     }
 
     void mel_spectrogram(int MELSIZE, int SAMPLE_RATE, float MIN_FREQ, float MAX_FREQ, float MEL_700, float MEL_2595) {
-
+        if (mel_image_data != nullptr) delete[] mel_image_data;
         mel_image_data = new float[image_lines*MELSIZE];
         mel_image_width = MELSIZE;
         auto mel = Mel(image_width, SAMPLE_RATE, MELSIZE, MIN_FREQ, MAX_FREQ, MEL_700, MEL_2595);
